@@ -415,6 +415,9 @@ if __name__ == "__main__":
   print("  - Creating 120 film 6x7cm carrier")
   genCarrier(name="23C_120_6x7cm", cut_width=2.675, cut_height=2.200, film_width=2.425+0.010, aligner_diam=0.750, extra_pins=False)
 
+  print("  - Creating 120 film 6x6cm carrier")
+  genCarrier(name="23C_120_6x6cm", cut_width=2.200, cut_height=2.200, film_width=2.425+0.010, aligner_diam=0.750, extra_pins=False)
+  
   print("done")
 
 
