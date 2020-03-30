@@ -43,6 +43,12 @@ import math
 # regardless of film size
 #
 
+# Resolution of drawing arc
+arc_resolution = 0.003
+
+# Width of line in svg file
+stroke_width = 0.01
+
 # bounding box on entire design
 img_width  = 8.6
 img_height = 6.5
@@ -89,15 +95,26 @@ def makeFooter():
   return "</svg>\n"
 
 #
+#
+#
+def makeStroke(stroke_path, close_end=True):
+  if close_end:
+    return "  <path stroke=\"black\" fill=\"none\" stroke-width=\"%.5f\" d=\"%s z\" />\n\n" % (stroke_width, stroke_path)
+  else:
+    return "  <path stroke=\"black\" fill=\"none\" stroke-width=\"%.5f\" d=\"%s\" />\n\n" % (stroke_width, stroke_path)
+
+#
 # Draw outline of partial arc given center, radius starting and ending angle (radians)
 # if moveTo is True, it lift's the pen, otherwise it just continues path
 #
 def drawArc(center, rad, theta0, theta1, moveTo):
     one_degree = (2.0*math.pi)/360.0
 
-    dtheta = one_degree*0.5
+    dtheta = math.atan(arc_resolution/rad)
+
     num_segments = 1+int(abs(theta1-theta0)/dtheta)
     dtheta = (theta1-theta0)/num_segments
+    
 
     path = ""
 
@@ -169,7 +186,8 @@ def makePaddleOutline():
   outline += drawArc(fillet_centerB, handle_fillet, 1.5*math.pi, 1.5*math.pi-handle_theta1, False)
 
   # draw entire outline
-  s += "  <path stroke=\"black\" fill=\"none\" stroke-width=\".01\" d=\"%s z\" />\n\n" % (outline)
+  s += makeStroke(outline)
+  
   return s
 
 
@@ -183,8 +201,8 @@ def makePaddleSeparatorHoles():
   R = handle_width/2 * 0.6
   holes  = drawArc([x_center+large_rad+handle_length-handle_width/2, y_center], R, 0, 2*math.pi, True)
   holes += drawArc([x_center-large_rad+R*1.2, y_center], R*0.8, 0, 2*math.pi, True)
-  
-  s += "  <path stroke=\"black\" fill=\"none\" stroke-width=\".01\" d=\"%s z\" />\n\n" % (holes)
+ 
+  s += makeStroke(holes)
 
   return s
 
@@ -200,11 +218,11 @@ def makeFilmCutout(cut_width, cut_height, film_width, aligner_diam):
   cut_x = x_center - cut_height/2
   cut_y = y_center - cut_width/2
 
-  s += "  <path stroke=\"black\" fill=\"none\" stroke-width=\".01\" d=\"M%f,%f l%f,0 l0,%f l%f,0 z\" />\n\n" % (
+  s += makeStroke("M%f,%f l%f,0 l0,%f l%f,0" % (
        cut_x, cut_y,
        cut_height,
        cut_width,
-       -cut_height) 
+       -cut_height)) 
 
   return s
 
@@ -240,7 +258,7 @@ def makeAligners(cut_width, cut_height, film_width, aligner_diam, scale):
   aligners += drawArc(p, aligner_rad*scale, 0, 2*math.pi, True)
 
   # draw aligners
-  s += "  <path stroke=\"black\" fill=\"none\" stroke-width=\".01\" d=\"%s\" />\n\n" % aligners 
+  s += makeStroke(aligners)
 
   return s
 
@@ -257,8 +275,9 @@ def makeRing():
 
   ring  = drawArc([x_center, y_center], ring_diam/2, 0.0, 2*math.pi, True)
   ring += drawArc([x_center, y_center], ring_diam/2-0.5, 0.0, 2*math.pi, True)
-  s += "  <path stroke=\"black\" fill=\"none\" stroke-width=\".01\" d=\"%s\" />\n\n" % ring
-
+  
+  s += makeStroke(ring)
+  
   return s
 
 #
@@ -274,7 +293,7 @@ def makeRingAligners():
   holes += drawArc([x_center-off, y_center], 0.125, 0.0, 2*math.pi, True)
   holes += drawArc([x_center+off, y_center], 0.125, 0.0, 2*math.pi, True)
 
-  s += "  <path stroke=\"black\" fill=\"none\" stroke-width=\".01\" d=\"%s\" />" % holes
+  s += makeStroke(holes)
 
   return s
 
@@ -293,7 +312,7 @@ def makeExtraPins(pin_diam):
   holes += drawArc([x_center+off, y_center-off], pin_diam/2, 0.0, 2*math.pi, True)
   holes += drawArc([x_center+off, y_center+off], pin_diam/2, 0.0, 2*math.pi, True)
 
-  s += "  <path stroke=\"black\" fill=\"none\" stroke-width=\".01\" d=\"%s\" />" % holes
+  s += makeStroke(holes)
 
   return s
 
